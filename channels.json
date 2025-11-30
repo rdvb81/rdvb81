@@ -1,0 +1,22 @@
+[
+  {
+    "name": "TV1 Azərbaycan",
+    "url": "http://51.20.75.142/hls/tv1.m3u8",
+    "info": "TV1 – Azərbaycan kanalı (nümunə link)"
+  },
+  {
+    "name": "AzTV",
+    "url": "http://51.20.75.142/hls/aztv.m3u8",
+    "info": "AzTV – dövlət kanalı (nümunə link)"
+  },
+  {
+    "name": "İTV",
+    "url": "http://51.20.75.142/hls/itv.m3u8",
+    "info": "İctimai TV (nümunə)"
+  },
+  {
+    "name": "ARB",
+    "url": "http://51.20.75.142/hls/arb.m3u8",
+    "info": "ARB TV (nümunə)"
+  }
+]
