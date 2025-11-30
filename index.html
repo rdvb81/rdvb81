@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>IPTV Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <h1>DRM IPTV Panel</h1>
+        <p>Sadə pulsuz IPTV paneli – HLS / M3U8 dəstəyi</p>
+    </header>
+
+    <main class="main">
+        <aside class="sidebar">
+            <h2>Kanallar</h2>
+            <ul id="channelList"></ul>
+        </aside>
+
+        <section class="player-area">
+            <div class="player-wrapper">
+                <video id="videoPlayer" controls autoplay playsinline></video>
+            </div>
+            <div class="now-playing">
+                <h2 id="currentChannelName">Kanal seçilməyib</h2>
+                <p id="currentChannelInfo">Soldan kanal seç.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>Hazırlayan: Reşad üçün xüsusi IPTV panel 😎</span>
+    </footer>
+</div>
+
+<script>
+    let channels = [];
+    let currentHls = null;
+
+    function playChannel(channel) {
+        const video = document.getElementById("videoPlayer");
+        const nameEl = document.getElementById("currentChannelName");
+        const infoEl = document.getElementById("currentChannelInfo");
+
+        nameEl.textContent = channel.name;
+        infoEl.textContent = channel.info || channel.url;
+
+        // Köhnə HLS obyekti varsa, silək
+        if (currentHls) {
+            currentHls.destroy();
+            currentHls = null;
+        }
+
+        // HLS dəstəklənirsə
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(channel.url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                video.play().catch(() => {});
+            });
+            currentHls = hls;
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari və s.
+            video.src = channel.url;
+            video.play().catch(() => {});
+        } else {
+            alert("Bu brauzer HLS (m3u8) dəstəkləmir. Başqa brauzer yoxla.");
+        }
+    }
+
+    function renderChannelList() {
+        const listEl = document.getElementById("channelList");
+        listEl.innerHTML = "";
+
+        channels.forEach((ch, index) => {
+            const li = document.createElement("li");
+            li.textContent = ch.name;
+            li.classList.add("channel-item");
+            li.addEventListener("click", () => {
+                // Aktiv kanal stilini dəyiş
+                document
+                    .querySelectorAll(".channel-item")
+                    .forEach(el => el.classList.remove("active"));
+                li.classList.add("active");
+
+                playChannel(ch);
+            });
+
+            // Birinci kanalı auto aktiv elə
+            if (index === 0) {
+                li.classList.add("active");
+            }
+
+            listEl.appendChild(li);
+        });
+
+        // İlk kanalı avtomatik aç
+        if (channels.length > 0) {
+            playChannel(channels[0]);
+        }
+    }
+
+    // channels.json faylını oxu
+    fetch("channels.json?_=" + Date.now())
+        .then(res => res.json())
+        .then(data => {
+            channels = data;
+            renderChannelList();
+        })
+        .catch(err => {
+            console.error("channels.json yüklənmədi:", err);
+            alert("channels.json tapılmadı və ya səhv formatdadır.");
+        });
+</script>
+</body>
+</html>
